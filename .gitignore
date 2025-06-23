@@ -1,0 +1,10 @@
+# Logs
+*.log
+
+# Backups
+docker-stack/backups/
+*.backup.*
+
+# Temp files
+*.tmp
+
