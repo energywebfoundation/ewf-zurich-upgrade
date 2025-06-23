@@ -122,5 +122,5 @@ docker-stack/
 
 For issues or questions:
 
-- Open an issue 📋 in the repository
-- Contact EWF NetOps team [📧](<netops@energyweb.org>)
+- Open an issue 📋 in the [repository](https://github.com/energywebfoundation/ewf-zurich-upgrade)
+- Contact EWF NetOps team [📧](mailto:netops@energyweb.org)
