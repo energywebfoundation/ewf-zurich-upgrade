@@ -177,7 +177,7 @@ detect_client_type() {
     elif [[ "$has_parity" == "true" ]]; then
         CLIENT_TYPE="openethereum"
         CONFIG_DIR="${DOCKER_STACK_DIR}/config"
-        CHAINSPEC_DIR="${CONFIG_DIR}"  # Add this line
+        CHAINSPEC_DIR="${CONFIG_DIR}"
         CHAINSPEC_FILE="${CONFIG_DIR}/chainspec.json"
         log_info "✅ Detected OpenEthereum client"
     else
