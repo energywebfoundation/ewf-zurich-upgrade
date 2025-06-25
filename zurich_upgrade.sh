@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script version
-VERSION="1.0.0"
+VERSION="1.0.1"
 
 # EnergyWebChain/Volta Node Upgrade Script for Zurich Hardfork
 # Upgrades image versions, downloads chainspec, and restarts containers
@@ -27,6 +27,7 @@ DOCKER_COMPOSE_FILE="" # Will be set after finding compose file
 DETECTED_NETWORK=""    # Will be set during network detection
 BACKUP_ENABLED=false   # Will be set by --backup flag
 BACKUP_DIR=""         # Will be set after detecting docker-stack
+DOCKER_COMPOSE_CMD=""  # Will store either "docker-compose" or "docker compose"
 
 # Chainspec URLs
 VOLTA_CHAINSPEC_URL="https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/refs/heads/master/Volta.json"
@@ -176,6 +177,7 @@ detect_client_type() {
     elif [[ "$has_parity" == "true" ]]; then
         CLIENT_TYPE="openethereum"
         CONFIG_DIR="${DOCKER_STACK_DIR}/config"
+        CHAINSPEC_DIR="${CONFIG_DIR}"
         CHAINSPEC_FILE="${CONFIG_DIR}/chainspec.json"
         log_info "✅ Detected OpenEthereum client"
     else
@@ -186,15 +188,27 @@ detect_client_type() {
 
 # Validate prerequisites
 validate_prerequisites() {
-        log_info "✅ Validating prerequisites..."
+    log_info "✅ Validating prerequisites..."
 
     # Check required tools
-    for tool in docker docker-compose curl jq; do
+    for tool in docker curl jq; do
         if ! command -v "$tool" >/dev/null 2>&1; then
             log_error "❌ Required tool not found: $tool"
             exit 1
         fi
     done
+
+    # Check for docker compose/docker-compose command
+    if command -v docker-compose >/dev/null 2>&1; then
+        DOCKER_COMPOSE_CMD="docker-compose"
+        log_info "✅ Using docker-compose command"
+    elif docker compose version >/dev/null 2>&1; then
+        DOCKER_COMPOSE_CMD="docker compose"
+        log_info "✅ Using docker compose command"
+    else
+        log_error "❌ Neither docker-compose nor docker compose found"
+        exit 1
+    fi
 
     # Check Docker is running
     if ! docker info >/dev/null 2>&1; then
@@ -503,29 +517,29 @@ restart_docker_containers() {
 
     # Stop containers gracefully
     log_info "⏹️  Stopping containers..."
-    if ! docker-compose -f "$DOCKER_COMPOSE_FILE" down --timeout 60; then
+    if ! $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" down --timeout 60; then
         log_error "❌ Failed to stop containers gracefully"
         exit 1
     fi
 
     # Pull updated images
     log_info "📥 Pulling updated images..."
-    docker-compose -f "$DOCKER_COMPOSE_FILE" pull
+    $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" pull
 
     # Start containers
     log_info "🚀 Starting containers..."
-    docker-compose -f "$DOCKER_COMPOSE_FILE" up -d --force-recreate
+    $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" up -d --force-recreate
 
     # Wait and verify
     log_info "⏳ Waiting for containers to start..."
     sleep 15
 
-    if docker-compose -f "$DOCKER_COMPOSE_FILE" ps | grep -q "Up"; then
+    if $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps | grep -q "Up"; then
         log_info "✅ Containers started successfully"
-        docker-compose -f "$DOCKER_COMPOSE_FILE" ps
+        $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps
     else
         log_error "❌ Some containers failed to start"
-        docker-compose -f "$DOCKER_COMPOSE_FILE" logs --tail=20
+        $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" logs --tail=20
         exit 1
     fi
 }
@@ -677,7 +691,7 @@ main() {
             esac
 
             # Show container changes
-            containers=$(docker-compose -f "$DOCKER_COMPOSE_FILE" ps --services)
+            containers=$($DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps --services)
             log_info "🔍 DRY RUN: Would restart the following containers:"
             for container in $containers; do
                 log_info "           - $container"
