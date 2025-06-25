@@ -1,7 +1,12 @@
-# Manual Zurich Hardfork Upgrade Guide 🔧
+# Zurich Hardfork Upgrade — Manual Procedure 🔧
 
-This guide provides step-by-step instructions for manually upgrading of EnergyWebChain/Volta node for the Zurich hardfork.
-WARNING: Read ALL steps before proceeding. This upgrade affects live validator nodes!
+*This guide provides step-by-step instructions for manually upgrading of Volta/EnergyWebChain node for the Zurich hardfork.*
+
+*The upgrade process involves updating the client version, downloading the new chainspec, and restarting the node.*
+
+*This guide is intended for users who prefer manual upgrades.*
+
+⚠️ **WARNING**: Read All steps before proceeding.
 
 ## 1. Pre-upgrade Checks 📋
 
