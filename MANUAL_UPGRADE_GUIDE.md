@@ -1,12 +1,12 @@
 # Zurich Hardfork Upgrade — Manual Procedure 🔧
 
-*This guide provides step-by-step instructions for manually upgrading of Volta/EnergyWebChain node for the Zurich hardfork.*
+⚠️ **WARNING**: Read All steps before proceeding.
 
-*The upgrade process involves updating the client version, downloading the new chainspec, and restarting the node.*
+*This guide provides step-by-step instructions for manually upgrading of Volta or EnergyWebChain node for the Zurich hardfork.*
+
+*The upgrade process involves updating the EVM client version, downloading the new chainspec, and restarting the node.*
 
 *This guide is intended for users who prefer manual upgrades.*
-
-⚠️ **WARNING**: Read All steps before proceeding.
 
 ## 1. Pre-upgrade Checks 📋
 
@@ -31,15 +31,7 @@ curl -X POST -H "Content-Type: application/json" \
 
 ```
 
-### 1.1.2 Check the `.env` file ✏️
-
-```bash
-cat docker-stack/.env
-```
-
-If you see `NETHERMIND_VERSION`, your node is running Nethermind. If you see `PARITY_VERSION`, it is running OpenEthereum.
-
-### 1.1.3 Check the Docker images of running containers ☸️
+### 1.1.2 Check the Docker images of running containers ☸️
 
 ```bash
 docker ps --format "table {{.Image}}\t{{.Names}}"
@@ -48,12 +40,20 @@ docker ps --format "table {{.Image}}\t{{.Names}}"
 ```bash
 # Example output for OpenEthereum
 IMAGE                              NAMES
-openethereum/openethereum:v3.3.5   docker-stack_parity_1
+openethereum/openethereum:v3.3.3   docker-stack_parity_1
 
 # Example output for Nethermind
 IMAGE                                      NAMES
 nethermind/nethermind:1.31.10              docker-stack_nethermind_1
 ```
+
+### 1.1.2 Check the `.env` file ✏️
+
+```bash
+cat docker-stack/.env
+```
+
+If you see `NETHERMIND_VERSION`, your node is running Nethermind. If you see `PARITY_VERSION`, it is running OpenEthereum.
 
 ### 1.2 Verify network 🌐
 
@@ -64,9 +64,12 @@ curl -X POST -H "Content-Type: application/json" \
 ```
 
 ```bash
-# Response for Volta
+# Response for Volta.
+# Volta Network ID: 73799
 {"jsonrpc":"2.0","result":"73799","id":1}
+
 # Response for EnergyWebChain
+# EnergyWebChain Network ID: 246
 {"jsonrpc":"2.0","result":"246","id":1}
 ```
 
@@ -78,7 +81,7 @@ For Nethermind:
 
 ```bash
 # Update NETHERMIND_VERSION in .env
-NETHERMIND_VERSION="nethermind/nethermind:1.31.10" [to be determined]
+NETHERMIND_VERSION="nethermind/nethermind:1.31.12"
 ```
 
 For OpenEthereum:

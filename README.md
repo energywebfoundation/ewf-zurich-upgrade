@@ -1,126 +1,29 @@
-# Zurich Hardfork Upgrade 🚀
+# Zurich Hardfork Node Upgrade
 
-This script automates the upgrade process for EnergyWebChain and Volta nodes for the Zurich hardfork.
+⚠️ **WARNING**: Read All steps before proceeding.
 
-## Features ✨
+*The upgrade process involves updating the EVM client version, downloading the new chainspec, and restarting the node.*
+*This guide provides two methods for upgrading Volta or EnergyWebChain node for the Zurich hardfork:*
 
-- 🔍 Auto-detects node configuration (EWC/Volta network)
-- 🛠️ Supports both Nethermind and OpenEthereum clients
-- 📥 Downloads correct chainspec
-- 🔄 Updates client versions:
-  - Nethermind: → to be determined
-  - OpenEthereum: → v3.3.5
-- 💾 Creates backups before any changes
-- 🚀 Handles container restart safely
+- **Automated Upgrade**: Use the provided script for a quick upgrade.
+- **Manual Upgrade**: Follow step-by-step instructions for full control.
 
-## Prerequisites 📋
+**User can choose either method based on their preference and expertise.**
 
-- Script Placement 📍
-  - Place the script in the same directory as your docker-stack folder
-  - Example structure:
+## Choose Your Method 📋
 
-    ```bash
-    /your/path/
-    ├── docker-stack/    # Your existing docker-stack directory
-    └── zurich_upgrade.sh  # Place the script here
-    ```
+### 1. Using the Script </>
 
-- Directory Structure 📁
-  - The script expects the following structure:
+- See [Automated Upgrade Guide](<https://github.com/energywebfoundation/ewf-zurich-upgrade/blob/master/AUTOMATED_UPGRADE_GUIDE.md>)
+- Automated process
 
-```bash
-docker-stack/
-├── .env
-├── chain-data
-│   ├── cache
-│   ├── chains
-│   ├── keys
-│   ├── network
-│   └── signer
-├── config
-│   ├── chainspec.json
-│   ├── nc-lastblock.txt
-│   ├── parity-non-signing.toml
-│   ├── parity-signing.toml
-│   └── peers
-└── docker-compose.yml
+### 2. Manual Steps ✍️
 
-docker-stack/
-├── .env
-├── chainspec
-│   └── energyweb.json [`volta.json` if `Volta` network]
-├── configs
-│   └── energyweb.cfg [`volta.cfg` if `Volta` network]
-├── database
-│   └── energyweb [`volta` if `Volta` network]
-├── docker-compose.yml
-├── keystore
-│   ├── node.key.plain
-│   ├── protection_keys
-│   ├── UTC--2025-06-20T15-18-00.581563000Z--XXXXXX
-│   └── UTC--2025-06-20T15-18-44.701058000Z--YYYYYY
-├── logs
-│   └── energyweb.logs.txt [`volta.logs.txt` if `Volta` network]
-└── NLog.config
-```
-
-## Usage 🔧
-
-1. Download the script:
-
-   ```bash
-   curl -O https://raw.githubusercontent.com/energywebfoundation/zurich_upgrade.sh
-   chmod +x zurich_upgrade.sh
-   ```
-
-2. Run in dry-run mode first (recommended):
-
-   ```bash
-   sudo ./zurich_upgrade.sh --dry-run
-   ```
-
-3. Perform the actual upgrade:
-
-   ```bash
-   sudo ./zurich_upgrade.sh
-   ```
-
-## Options 🎛️
-
-- `-v, --version`: Show script version
-- `default`: Run the script in normal mode
-- `-b, --backup`: Create a backup of the modified files
-- `-n, --dry-run`: Preview changes without applying them
-- `-s, --skip-restart`: Update configs without restarting containers
-- `-h, --help`: Show help message
-
-### Common Issues ⚠️
-
-1. **Docker-stack not found**
-   - The script searches for docker-stack directory in:
-     - Same directory as the script
-     - Current working directory (`./docker-stack`)
-     - Data directory (`/data/docker-stack`)
-     - User's home directory (`$HOME/docker-stack` or `/home/$USER/docker-stack`)
-   - Solution: Place the script in the same directory as docker-stack or use one of the expected locations
-
-2. **Client detection fails**
-   - Verify `.env` file contains either:
-     - `NETHERMIND_VERSION=...`
-     - `PARITY_VERSION=...`
-
-3. **Network detection fails**
-   - Ensure node is running and accessible at `http://localhost:8545`
-
-### Logs 📜
-
-- All output is logged to a timestamped file in the script directory.
-- Log file names include the run mode (dry-run, skip-restart, etc.) and a timestamp.
-- Example: `zurich_upgrade_dry_run_backup_20231001_123456.log`
+- See [Manual Upgrade Guide](<https://github.com/energywebfoundation/ewf-zurich-upgrade/blob/master/MANUAL_UPGRADE_GUIDE.md>)
+- Full control
+- Step-by-step instructions
 
 ## Support 💬
 
-For issues or questions:
-
-- Open an issue 📋 in the [repository](https://github.com/energywebfoundation/ewf-zurich-upgrade)
+- Issues: [GitHub](https://github.com/energywebfoundation/ewf-zurich-upgrade/issues)
 - Contact EWF NetOps team [📧](mailto:netops@energyweb.org)
