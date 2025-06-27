@@ -16,6 +16,17 @@
 - 💾 Creates backups before any changes [Optional]
 - 🚀 Handles container restart
 
+## Operating System 🖥️
+
+This script is compatible with systems running a Volta or EnergyWebChain node.
+
+Tested on Linux distributions:
+
+- Ubuntu
+- Debian
+- CentOS
+- Red Hat
+
 ## Prerequisites 📋
 
 - Script Placement 📍
