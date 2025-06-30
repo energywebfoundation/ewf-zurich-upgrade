@@ -424,7 +424,7 @@ update_image_version() {
         case "$line" in
             NETHERMIND_VERSION=*)
                 if [[ "$CLIENT_TYPE" == "nethermind" ]]; then
-                    echo "NETHERMIND_VERSION=\"nethermind/nethermind:${NETHERMIND_NEW_VERSION}\"" >> "$temp_file"
+                    echo "NETHERMIND_VERSION=nethermind/nethermind:${NETHERMIND_NEW_VERSION}" >> "$temp_file"
                     log_info "🔄 Updated Nethermind version: $current_ver -> ${NETHERMIND_NEW_VERSION}"
                 else
                     echo "$line" >> "$temp_file"
@@ -432,7 +432,7 @@ update_image_version() {
                 ;;
             PARITY_VERSION=*)
                 if [[ "$CLIENT_TYPE" == "openethereum" ]]; then
-                    echo "PARITY_VERSION=\"openethereum/openethereum:${OPENETHEREUM_NEW_VERSION}\"" >> "$temp_file"
+                    echo "PARITY_VERSION=openethereum/openethereum:${OPENETHEREUM_NEW_VERSION}" >> "$temp_file"
                     log_info "🔄 Updated OpenEthereum version: $current_ver -> ${OPENETHEREUM_NEW_VERSION}"
                 else
                     echo "$line" >> "$temp_file"
