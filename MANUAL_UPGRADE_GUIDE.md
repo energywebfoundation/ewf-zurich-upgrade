@@ -79,7 +79,7 @@ curl -X POST -H "Content-Type: application/json" \
 
 Edit your `.env` file:
 
-sudo vi docker-stack/.env
+`sudo vi docker-stack/.env`
 
 For Nethermind:
 
