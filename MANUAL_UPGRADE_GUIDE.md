@@ -35,6 +35,8 @@ curl -X POST -H "Content-Type: application/json" \
 
 ```bash
 docker ps --format "table {{.Image}}\t{{.Names}}"
+or
+sudo docker ps --format "table {{.Image}}\t{{.Names}}"
 ```
 
 ```bash
@@ -77,6 +79,8 @@ curl -X POST -H "Content-Type: application/json" \
 
 Edit your `.env` file:
 
+sudo vi docker-stack/.env
+
 For Nethermind:
 
 ```bash
@@ -96,46 +100,55 @@ PARITY_VERSION="openethereum/openethereum:v3.3.5"
 ### 3.1 For Volta validator node running with OpenEthereum client
 
 ```bash
+sudo -s
 cd docker-stack
 curl -o config/chainspec.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/Volta.json
 
 # Verify SHA256 checksum ✔️
-echo "a3703455d145171a33f4ae31ba8b1630a551b0db7fdacd7e685574d5a9fc3afb config/chainspec.json" | sha256sum -c
+echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 config/chainspec.json" | sha256sum -c
+config/chainspec.json: OK
 ```
 
 ### 3.2 For Volta validator node running with Nethermind client
 
 ```bash
+sudo -s
 cd docker-stack
 curl -o chainspec/volta.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/Volta.json
 
 # Verify SHA256 checksum ✔️
-echo "a3703455d145171a33f4ae31ba8b1630a551b0db7fdacd7e685574d5a9fc3afb chainspec/volta.json" | sha256sum -c
+echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 chainspec/volta.json" | sha256sum -c
+chainspec/volta.json: OK
 ```
 
 ### 3.3 For EnergyWebChain validator node running OpenEthereum client
 
 ```bash
+sudo -s
 cd docker-stack
 curl -o config/chainspec.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
 echo "7a05ac8da3d3f7192da074dd6987205fdb3300f7dd4970876e5f2ad249bbcd2d config/chainspec.json" | sha256sum -c
+config/chainspec.json: OK
 ```
 
 ### 3.4 For EnergyWebChain validator node running Nethermind client
 
 ```bash
+sudo -s
 cd docker-stack
 curl -o chainspec/energyweb.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
 echo "7a05ac8da3d3f7192da074dd6987205fdb3300f7dd4970876e5f2ad249bbcd2d chainspec/energyweb.json" | sha256sum -c
+chainspec/energyweb.json: OK
 ```
 
 ## 5. Restart Node 🚀
 
 ```bash
+sudo -s
 cd docker-stack
 docker-compose up -d --force-recreate
 ```
@@ -161,7 +174,7 @@ curl -X POST -H "Content-Type: application/json" \
 {"jsonrpc":"2.0","result":"OpenEthereum//v3.3.5-stable/x86_64-linux-musl/rustc1.59.0","id":1}
 
 # Resoinse of running node of Nethermind
-{"jsonrpc":"2.0","result":"Nethermind/v1.31.10+f62cfede/linux-x64/dotnet9.0.4","id":1}
+{"jsonrpc":"2.0","result":"Nethermind/v1.31.12+f62cfede/linux-x64/dotnet9.0.4","id":1}
 
 ```
 
