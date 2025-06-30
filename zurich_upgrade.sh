@@ -34,7 +34,7 @@ VOLTA_CHAINSPEC_URL="https://raw.githubusercontent.com/energywebfoundation/ewf-c
 ENERGYWEB_CHAINSPEC_URL="https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/refs/heads/master/EnergyWebChain.json"
 
 # Chainspec SHA256 checksums
-VOLTA_CHAINSPEC_SHA256="a3703455d145171a33f4ae31ba8b1630a551b0db7fdacd7e685574d5a9fc3afb"
+VOLTA_CHAINSPEC_SHA256="5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37"
 ENERGYWEB_CHAINSPEC_SHA256="7a05ac8da3d3f7192da074dd6987205fdb3300f7dd4970876e5f2ad249bbcd2d"
 
 # New Client Version
