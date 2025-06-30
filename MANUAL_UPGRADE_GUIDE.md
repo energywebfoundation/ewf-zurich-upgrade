@@ -174,7 +174,7 @@ curl -X POST -H "Content-Type: application/json" \
 {"jsonrpc":"2.0","result":"OpenEthereum//v3.3.5-stable/x86_64-linux-musl/rustc1.59.0","id":1}
 
 # Resoinse of running node of Nethermind
-{"jsonrpc":"2.0","result":"Nethermind/v1.31.12+f62cfede/linux-x64/dotnet9.0.4","id":1}
+{"jsonrpc":"2.0","result":"Nethermind/v1.31.12+3b5f1ca5/linux-x64/dotnet9.0.6","id":1}
 
 ```
 
