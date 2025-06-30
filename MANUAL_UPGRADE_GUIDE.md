@@ -10,6 +10,12 @@
 
 ## 1. Pre-upgrade Checks 📋
 
+SSH into validator node and ensure you have the necessary permissions to perform the upgrade.
+
+```bash
+ssh validator-node-ip
+```
+
 ### 1.1 Check client version
 
 Identifiying EVM client can be done by multiple ways. choose one of the following methods or use all of them to be sure.

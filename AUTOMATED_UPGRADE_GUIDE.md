@@ -29,6 +29,8 @@ Tested on Linux distributions:
 
 ## Prerequisites 📋
 
+- SSH access to the validator node
+
 - Script Placement 📍
   - Place the script in the same directory as your docker-stack folder
   - Example structure:
