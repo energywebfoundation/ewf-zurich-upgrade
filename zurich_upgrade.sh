@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script version
-VERSION="1.0.1"
+VERSION="1.0.2"
 
 # EnergyWebChain/Volta Node Upgrade Script for Zurich Hardfork
 # Upgrades image versions, downloads chainspec, and restarts containers
@@ -135,53 +135,96 @@ detect_docker_stack() {
 
 # Detect client type and set paths
 detect_client_type() {
-        log_info "🔍 Detecting client type from .env file..."
+    log_info "🔍 Detecting client type..."
 
-    local has_nethermind=false
-    local has_parity=false
+    local rpc_client=""
+    local docker_client=""
+    local env_client=""
+    local detection_results=()
 
-    if grep -q "^NETHERMIND_VERSION=" "$ENV_FILE"; then
-        has_nethermind=true
+    # 1. RPC Detection
+    local response
+    response=$(curl -s -X POST -H "Content-Type: application/json" \
+        --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":1}' \
+        http://localhost:8545)
+
+    if [ $? -eq 0 ] && [ ! -z "$response" ]; then
+        if echo "$response" | grep -qi "nethermind"; then
+            rpc_client="nethermind"
+            detection_results+=("RPC: Nethermind")
+        elif echo "$response" | grep -qi "openethereum"; then
+            rpc_client="openethereum"
+            detection_results+=("RPC: OpenEthereum")
+        fi
     fi
+    log_info "🔍 RPC detection result: ${rpc_client:-none}"
 
-    if grep -q "^PARITY_VERSION=" "$ENV_FILE"; then
-        has_parity=true
+    # 2. Docker Detection
+    local docker_info
+    docker_info=$(docker ps --format "table {{.Image}}\t{{.Names}}")
+
+    if echo "$docker_info" | grep -qi "nethermind"; then
+        docker_client="nethermind"
+        detection_results+=("Docker: Nethermind")
+    elif echo "$docker_info" | grep -qi "openethereum"; then
+        docker_client="openethereum"
+        detection_results+=("Docker: OpenEthereum")
     fi
+    log_info "🔍 Docker detection result: ${docker_client:-none}"
 
-    if [[ "$has_nethermind" == "true" ]] && [[ "$has_parity" == "true" ]]; then
-        log_error "❌ Found both NETHERMIND_VERSION and PARITY_VERSION in .env file"
-        exit 1
-    elif [[ "$has_nethermind" == "true" ]]; then
-        CLIENT_TYPE="nethermind"
-        CHAINSPEC_DIR="${DOCKER_STACK_DIR}/chainspec"
-        log_info "🔍 Debug [detect_client_type]: Set CHAINSPEC_DIR=$CHAINSPEC_DIR"
+    # 3. ENV File Detection
+    if [ -f "$ENV_FILE" ]; then
+        if grep -q "^NETHERMIND_VERSION=" "$ENV_FILE"; then
+            env_client="nethermind"
+            detection_results+=("ENV: Nethermind")
+        elif grep -q "^PARITY_VERSION=" "$ENV_FILE"; then
+            env_client="openethereum"
+            detection_results+=("ENV: OpenEthereum")
+        fi
+    fi
+    log_info "🔍 ENV file detection result: ${env_client:-none}"
 
-        # Verify chainspec directory exists and has expected files
-        if [[ ! -d "$CHAINSPEC_DIR" ]]; then
-            log_error "❌ Nethermind client detected but chainspec directory not found: $CHAINSPEC_DIR"
+    # Verify all methods agree
+    log_info "🔍 Detection results:"
+    printf '%s\n' "${detection_results[@]}" | while IFS= read -r result; do
+        log_info "   - $result"
+    done
+
+    if [[ -n "$rpc_client" && -n "$docker_client" && -n "$env_client" ]]; then
+        if [[ "$rpc_client" == "$docker_client" && "$docker_client" == "$env_client" ]]; then
+            CLIENT_TYPE="$rpc_client"
+
+            # Set paths based on verified client type
+            if [[ "$CLIENT_TYPE" == "nethermind" ]]; then
+                CHAINSPEC_DIR="${DOCKER_STACK_DIR}/chainspec"
+                if [[ ! -d "$CHAINSPEC_DIR" ]]; then
+                    log_error "❌ Required directory not found: $CHAINSPEC_DIR"
+                    exit 1
+                fi
+            else
+                CONFIG_DIR="${DOCKER_STACK_DIR}/config"
+                CHAINSPEC_DIR="${CONFIG_DIR}"
+                CHAINSPEC_FILE="${CONFIG_DIR}/chainspec.json"
+                if [[ ! -d "$CONFIG_DIR" ]]; then
+                    log_error "❌ Required directory not found: $CONFIG_DIR"
+                    exit 1
+                fi
+            fi
+
+            log_info "✅ Verified client type: $CLIENT_TYPE"
+            return 0
+        else
+            log_error "❌ Inconsistent client detection results:"
+            log_error "   - RPC detected: $rpc_client"
+            log_error "   - Docker detected: $docker_client"
+            log_error "   - ENV file detected: $env_client"
             exit 1
         fi
-
-        # Check for expected chainspec files
-        local has_chainspec_files=false
-        if [[ -f "${CHAINSPEC_DIR}/volta.json" ]] || [[ -f "${CHAINSPEC_DIR}/energyweb.json" ]]; then
-            has_chainspec_files=true
-        fi
-
-        if [[ "$has_chainspec_files" == "false" ]]; then
-            log_warn "⚠️  No volta.json or energyweb.json found in chainspec directory"
-            log_info "ℹ️  Will download chainspec file based on detected network"
-        fi
-
-        log_info "✅ Detected Nethermind client"
-    elif [[ "$has_parity" == "true" ]]; then
-        CLIENT_TYPE="openethereum"
-        CONFIG_DIR="${DOCKER_STACK_DIR}/config"
-        CHAINSPEC_DIR="${CONFIG_DIR}"
-        CHAINSPEC_FILE="${CONFIG_DIR}/chainspec.json"
-        log_info "✅ Detected OpenEthereum client"
     else
-        log_error "❌ Could not detect client type - no NETHERMIND_VERSION or PARITY_VERSION found"
+        log_error "❌ Could not detect client type using all methods:"
+        [[ -z "$rpc_client" ]] && log_error "   - RPC detection failed"
+        [[ -z "$docker_client" ]] && log_error "   - Docker detection failed"
+        [[ -z "$env_client" ]] && log_error "   - ENV file detection failed"
         exit 1
     fi
 }
@@ -509,6 +552,71 @@ download_chainspec() {
     log_info "✅ Chainspec downloaded and saved to: $CHAINSPEC_FILE"
 }
 
+# Verify running container image version
+verify_container_version() {
+    log_info "🔍 Verifying container image versions..."
+    local expected_image=""
+    local found_correct_version=false
+
+    # Set expected image based on client type
+    if [[ "$CLIENT_TYPE" == "nethermind" ]]; then
+        expected_image="nethermind/nethermind:${NETHERMIND_NEW_VERSION}"
+    else
+        expected_image="openethereum/openethereum:${OPENETHEREUM_NEW_VERSION}"
+    fi
+
+    log_info "🔍 Checking running containers for expected image: $expected_image"
+
+    # Get running containers with their images, removing header line
+    local containers_info
+    containers_info=$(docker ps --format "{{.Image}}" | grep -i "nethermind\|openethereum")
+
+    if [[ -z "$containers_info" ]]; then
+        log_error "❌ No ethereum client containers found running"
+        return 1
+    fi
+
+    log_info "🔍 Found running ethereum clients:"
+    while IFS= read -r image; do
+        log_info "   - Image: $image"
+        if [[ "$image" == "$expected_image" ]]; then
+            found_correct_version=true
+            log_info "✅ Found container running correct version"
+        fi
+    done <<< "$containers_info"
+
+    if [[ "$found_correct_version" != "true" ]]; then
+        log_error "❌ No containers found running expected image: $expected_image"
+        log_error "🔍 Current running images:"
+        echo "$containers_info"
+        return 1
+    fi
+
+    # Verify RPC endpoint is responding
+    local response
+    response=$(curl -s -X POST -H "Content-Type: application/json" \
+        --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":1}' \
+        http://localhost:8545)
+
+    if ! echo "$response" | grep -q "result"; then
+        log_error "❌ RPC endpoint not responding after restart"
+        return 1
+    fi
+
+    # Verify client type in RPC response
+    if [[ "$CLIENT_TYPE" == "nethermind" ]] && ! echo "$response" | grep -qi "nethermind"; then
+        log_error "❌ RPC endpoint reports wrong client type (expected Nethermind)"
+        return 1
+    elif [[ "$CLIENT_TYPE" == "openethereum" ]] && ! echo "$response" | grep -qi "openethereum"; then
+        log_error "❌ RPC endpoint reports wrong client type (expected OpenEthereum)"
+        return 1
+    fi
+
+    log_info "✅ Found container running correct image version"
+    log_info "✅ RPC endpoint is responding with correct client type"
+    return 0
+}
+
 # Restart Docker containers
 restart_docker_containers() {
     log_info "🔄 Restarting Docker containers..."
@@ -534,14 +642,25 @@ restart_docker_containers() {
     log_info "⏳ Waiting for containers to start..."
     sleep 15
 
-    if $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps | grep -q "Up"; then
-        log_info "✅ Containers started successfully"
-        $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps
-    else
+    if ! $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps | grep -q "Up"; then
         log_error "❌ Some containers failed to start"
         $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" logs --tail=20
         exit 1
     fi
+
+    # Add version verification
+    if ! verify_container_version; then
+        log_error "❌ Container version verification failed"
+        log_error "❌ Container might be running wrong version"
+        log_error "📋 Container status:"
+        $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps
+        log_error "📋 Container logs:"
+        $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" logs --tail=20
+        exit 1
+    fi
+
+    log_info "✅ Containers started and verified successfully"
+    $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps
 }
 
 # Show usage

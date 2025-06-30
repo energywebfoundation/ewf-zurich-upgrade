@@ -1,4 +1,4 @@
-# Zurich Hardfork Upgrade — Manual Procedure 🔧
+# Zurich Hardfork Upgrade — Manual Procedure ✍️
 
 ⚠️ **WARNING**: Read All steps before proceeding.
 
