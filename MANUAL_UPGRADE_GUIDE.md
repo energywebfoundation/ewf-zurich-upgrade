@@ -198,7 +198,15 @@ docker-compose logs -f --tail 100 parity
 docker-compose logs -f --tail 100 parity-telemetry
 ```
 
-### 6.4 Network Sync Status ♾️
+### 6.4 Restart Telegraf Service 🔄
+
+User might need to restart the Telegraf service to ensure telemetry immediately picks up the new client version
+
+```bash
+sudo systemctl restart telegraf
+```
+
+### 6.5 Network Sync Status ♾️
 
 ```bash
 # Check sync status

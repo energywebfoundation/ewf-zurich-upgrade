@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script version
-VERSION="1.0.2"
+VERSION="1.0.3"
 
 # EnergyWebChain/Volta Node Upgrade Script for Zurich Hardfork
 # Upgrades image versions, downloads chainspec, and restarts containers
@@ -617,6 +617,36 @@ verify_container_version() {
     return 0
 }
 
+# Restart telegraf service
+restart_telegraf_service() {
+    log_info "🔄 Attempting to restart telegraf service..."
+    local service_restarted=false
+
+    if command -v systemctl &>/dev/null; then
+        if systemctl restart telegraf &>/dev/null; then
+            log_info "✅ Telegraf service restarted successfully"
+            service_restarted=true
+        elif [ -f "/lib/systemd/system/telegraf.service" ] || [ -f "/etc/systemd/system/telegraf.service" ]; then
+            log_warn "⚠️  Failed to restart telegraf service via systemctl, but service file exists"
+            log_info "📋 Telegraf service status:"
+            systemctl status telegraf --no-pager || true
+        fi
+    fi
+
+    # Try service command as fallback
+    if [[ "$service_restarted" == "false" ]] && command -v service &>/dev/null; then
+        if service telegraf restart &>/dev/null; then
+            log_info "✅ Telegraf service restarted successfully with service command"
+            service_restarted=true
+        fi
+    fi
+
+    # Final status message
+    if [[ "$service_restarted" == "false" ]]; then
+        log_info "ℹ️  No telegraf service found or restart failed - monitoring may need manual restart"
+    fi
+}
+
 # Restart Docker containers
 restart_docker_containers() {
     log_info "🔄 Restarting Docker containers..."
@@ -658,6 +688,9 @@ restart_docker_containers() {
         $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" logs --tail=20
         exit 1
     fi
+
+    # Restart telegraf service after successful container restart
+    restart_telegraf_service
 
     log_info "✅ Containers started and verified successfully"
     $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" ps
@@ -815,6 +848,14 @@ main() {
             for container in $containers; do
                 log_info "           - $container"
             done
+
+            if command -v systemctl &>/dev/null && (systemctl list-unit-files | grep -i telegraf || [ -f "/lib/systemd/system/telegraf.service" ] || [ -f "/etc/systemd/system/telegraf.service" ]); then
+                log_info "🔍 DRY RUN: Would restart telegraf service via systemctl"
+            elif command -v service &>/dev/null && service --status-all 2>&1 | grep -i telegraf; then
+                log_info "🔍 DRY RUN: Would restart telegraf service via service command"
+            else
+                log_info "🔍 DRY RUN: No telegraf service detected, would skip telegraf restart"
+            fi
     else
         # Confirmation
         echo
@@ -831,6 +872,7 @@ main() {
             restart_docker_containers
         else
             log_info "⏭️  Skipping Docker container restart"
+            log_info "⏭️  Skipping telegraf service restart"
         fi
     fi
 
