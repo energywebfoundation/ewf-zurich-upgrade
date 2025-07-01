@@ -14,7 +14,7 @@
   - Nethermind: → `1.31.12`
   - OpenEthereum: → `v3.3.5`
 - 💾 Creates backups before any changes [Optional]
-- 🚀 Handles container restart
+- 🚀 Handles container restart and telegraf service restart
 
 ## Operating System 🖥️
 
