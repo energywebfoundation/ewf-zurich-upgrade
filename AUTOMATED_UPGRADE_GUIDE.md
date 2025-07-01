@@ -87,7 +87,7 @@ docker-stack/
 1. Download the script:
 
    ```bash
-   curl -O https://raw.githubusercontent.com/energywebfoundation/zurich_upgrade.sh
+   curl -O https://raw.githubusercontent.com/energywebfoundation/ewf-zurich-upgrade/refs/heads/master/zurich_upgrade.sh
    chmod +x zurich_upgrade.sh
    ```
 
