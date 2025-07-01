@@ -624,7 +624,7 @@ restart_telegraf_service() {
 
     if command -v systemctl &>/dev/null; then
         if systemctl restart telegraf &>/dev/null; then
-            log_info "✅ Telegraf service restarted successfully with systemctl"
+            log_info "✅ Telegraf service restarted successfully"
             service_restarted=true
         elif [ -f "/lib/systemd/system/telegraf.service" ] || [ -f "/etc/systemd/system/telegraf.service" ]; then
             log_warn "⚠️  Failed to restart telegraf service via systemctl, but service file exists"

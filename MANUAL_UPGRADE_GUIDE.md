@@ -200,7 +200,7 @@ docker-compose logs -f --tail 100 parity-telemetry
 
 ### 6.4 Restart Telegraf Service 🔄
 
-User might need to restart the Telegraf service to ensure telemetry picks up the new client version
+User might need to restart the Telegraf service to ensure telemetry immediately picks up the new client version
 
 ```bash
 sudo systemctl restart telegraf
