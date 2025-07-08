@@ -165,10 +165,6 @@ describe(`${currentChain.toUpperCase()} FORK VALIDATION TESTS :`, function () {
 
                 const deployer = new ethers.Wallet(DEPLOY_PK, provider);
 
-                const deployerAddress = await deployer.getAddress();
-
-                const nonce = await provider.getTransactionCount(deployerAddress);
-
                 const CounterFactory = await ethers.getContractFactory("Counter", deployer);
 
                 const counter = await CounterFactory.deploy();
