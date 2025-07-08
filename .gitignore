@@ -8,3 +8,18 @@ docker-stack/backups/
 # Temp files
 *.tmp
 
+# modules
+node_modules/
+
+#environment files
+.env
+
+# Artifacts
+dist/
+build/
+artifacts/
+
+#cache
+.cache/
+cache
+
