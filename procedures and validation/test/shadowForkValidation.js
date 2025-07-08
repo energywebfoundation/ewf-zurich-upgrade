@@ -80,11 +80,11 @@ const checkMintedAmountsAfterFork = async (rewardContract, nbOfBlocksToCheck) =>
 /* ------------------------------------------------------------------------ */
 /* Test Suite                                                               */
 /* ------------------------------------------------------------------------ */
-describe("VOLTA SHADOW-FORK VALIDATION TESTS :", function () {
+describe(`${currentChain.toUpperCase()} FORK VALIDATION TESTS :`, function () {
     let provider;
 
     before(() => {
-        provider = ethers.provider; // This is the provider created by Hardhat (in hardhat.config) for --network volta
+        provider = ethers.provider; // This is the provider created by Hardhat (in hardhat.config) for "--network" flag
     });
 
     describe("\n- Operational/Config checks", function () {
@@ -116,7 +116,7 @@ describe("VOLTA SHADOW-FORK VALIDATION TESTS :", function () {
             }
         });
 
-        it("\x1b[34m Rewards contract byte-code changes on the fork block (31824620) ", async function () {
+        it(`\x1b[34m Rewards contract byte-code changes on the fork block (${BLOCK_REWARD_STOP}) `, async function () {
             try {
                 const [codePre, codePost] = await Promise.all([
                     provider.getCode(REWARDS_CONTRACT, toHex(BLOCK_BEFORE_REWARD_STOP)),
@@ -214,7 +214,7 @@ describe("VOLTA SHADOW-FORK VALIDATION TESTS :", function () {
 
         it(`\x1b[34m After fork, mintedTotally \x1b[32mDOES NOT INCREASE\x1b \x1b[34m on on ${currentChain} \x1b[0m`, async () => {
 
-            console.log(`\n\x1b[33m [Fork] MintedTotally: (Checking ${nbOfBlocksToCheck} blocks after fork):\n \x1b[0m`);
+            console.log(`\n\x1b[33m [Upgraded ${currentChain}] MintedTotally: (Checking ${nbOfBlocksToCheck} blocks after fork):\n \x1b[0m`);
 
             const rewardContract = new ethers.Contract(REWARDS_CONTRACT, abi, provider);
 
@@ -248,41 +248,41 @@ describe("VOLTA SHADOW-FORK VALIDATION TESTS :", function () {
 
             console.log(`\n\x1b[36m[Bridge owner]\x1b[0m`);
 
-            console.log(`\t\x1b[33mVolta\x1b[0m
+            console.log(`\t\x1b[33m${currentChain}\x1b[0m
                 - Pre-fork: \x1b[32m${contractOwnerPre}\x1b[0m,
                 - Post-fork: \x1b[32m${contractOwnerPost}\x1b[0m
 
             `);
 
-            expect(contractOwnerPre).to.equal(contractOwnerPost, "Volta owner changed across fork");
+            expect(contractOwnerPre).to.equal(contractOwnerPost, `${currentChain} owner changed across fork`);
         });
 
-        it("The bridge contract liftingEnabled is the same on both Volta and Shadow Fork before and after the fork", async function () {
-            const liftingVoltaPre = await bridgeContract.liftingEnabled({ blockTag: BLOCK_PRE_FORK });
-            const liftingVoltaPost = await bridgeContract.liftingEnabled({ blockTag: BLOCK_POST_FORK });
+        it(`The bridge contract liftingEnabled is the same on both ${currentChain} and Shadow Fork before and after the fork`, async function () {
+            const liftingPrefork = await bridgeContract.liftingEnabled({ blockTag: BLOCK_PRE_FORK });
+            const liftingPostfork = await bridgeContract.liftingEnabled({ blockTag: BLOCK_POST_FORK });
 
             console.log(`\n\x1b[36m[Bridge liftingEnabled]\x1b[0m`);
 
-            console.log(`\t\x1b[33mVolta\x1b[0m
-                - Pre-fork: \x1b[32m${liftingVoltaPre}\x1b[0m,
-                - Post-fork: \x1b[32m${liftingVoltaPost}\x1b[0m
+            console.log(`\t\x1b[33m${currentChain}\x1b[0m
+                - Pre-fork: \x1b[32m${liftingPrefork}\x1b[0m,
+                - Post-fork: \x1b[32m${liftingPostfork}\x1b[0m
             `);
 
-            expect(liftingVoltaPre).to.equal(liftingVoltaPost, "Volta liftingEnabled changed across fork");
+            expect(liftingPrefork).to.equal(liftingPostfork, `${currentChain} liftingEnabled changed across fork`);
         });
 
         it("The bridge contract loweringEnabled is the same after the fork", async function () {
-            const loweringVoltaPre = await bridgeContract.loweringEnabled({ blockTag: BLOCK_PRE_FORK });
-            const loweringVoltaPost = await bridgeContract.loweringEnabled({ blockTag: BLOCK_POST_FORK });
+            const loweringPrefork = await bridgeContract.loweringEnabled({ blockTag: BLOCK_PRE_FORK });
+            const loweringPostfork = await bridgeContract.loweringEnabled({ blockTag: BLOCK_POST_FORK });
 
             console.log(`\n\x1b[36m[Bridge loweringEnabled]\x1b[0m`);
 
-            console.log(`\t\x1b[33mVolta\x1b[0m
-                - Pre-fork: \x1b[32m${loweringVoltaPre}\x1b[0m,
-                - Post-fork: \x1b[32m${loweringVoltaPost}\x1b[0m
+            console.log(`\t\x1b[33m${currentChain}\x1b[0m
+                - Pre-fork: \x1b[32m${loweringPrefork}\x1b[0m,
+                - Post-fork: \x1b[32m${loweringPostfork}\x1b[0m
             `);
 
-            expect(loweringVoltaPre).to.equal(loweringVoltaPost, "Volta loweringEnabled changed across fork");
+            expect(loweringPrefork).to.equal(loweringPostfork, `${currentChain} loweringEnabled changed across fork`);
         });
     });
 
