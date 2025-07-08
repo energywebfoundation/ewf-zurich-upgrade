@@ -208,7 +208,7 @@ describe(`${currentChain.toUpperCase()} FORK VALIDATION TESTS :`, function () {
             await checkMintedAmountsBeforeFork(rewardContract, nbOfBlocksToCheck);
         });
 
-        it(`\x1b[34m After fork, mintedTotally \x1b[32mDOES NOT INCREASE\x1b \x1b[34m on on ${currentChain} \x1b[0m`, async () => {
+        it(`\x1b[34m After fork, mintedTotally \x1b[32mDOES NOT INCREASE\x1b \x1b[34m on ${currentChain} \x1b[0m`, async () => {
 
             console.log(`\n\x1b[33m [Upgraded ${currentChain}] MintedTotally: (Checking ${nbOfBlocksToCheck} blocks after fork):\n \x1b[0m`);
 
@@ -253,7 +253,7 @@ describe(`${currentChain.toUpperCase()} FORK VALIDATION TESTS :`, function () {
             expect(contractOwnerPre).to.equal(contractOwnerPost, `${currentChain} owner changed across fork`);
         });
 
-        it(`The bridge contract liftingEnabled is the same on both ${currentChain} and Shadow Fork before and after the fork`, async function () {
+        it(`The bridge contract liftingEnabled is the same on both ${currentChain} and before and after the fork`, async function () {
             const liftingPrefork = await bridgeContract.liftingEnabled({ blockTag: BLOCK_PRE_FORK });
             const liftingPostfork = await bridgeContract.liftingEnabled({ blockTag: BLOCK_POST_FORK });
 
@@ -267,7 +267,7 @@ describe(`${currentChain.toUpperCase()} FORK VALIDATION TESTS :`, function () {
             expect(liftingPrefork).to.equal(liftingPostfork, `${currentChain} liftingEnabled changed across fork`);
         });
 
-        it("The bridge contract loweringEnabled is the same after the fork", async function () {
+        it("The bridge contract loweringEnabled is the same before and after the fork", async function () {
             const loweringPrefork = await bridgeContract.loweringEnabled({ blockTag: BLOCK_PRE_FORK });
             const loweringPostfork = await bridgeContract.loweringEnabled({ blockTag: BLOCK_POST_FORK });
 
