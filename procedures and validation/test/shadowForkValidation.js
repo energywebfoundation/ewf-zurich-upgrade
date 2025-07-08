@@ -32,6 +32,51 @@ const providerError = (e) =>
     e?.code === "CALL_EXCEPTION" ||
     e?.message?.includes("VM execution error");
 
+
+/* ------------------------------------------------------------------------ */
+/* Check functions                                                          */
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Checks the mintedTotally amounts before the fork block.
+ * @param {*} rewardContract - The reward contract instance.
+ * @param {*} nbOfBlocksToCheck - Number of blocks to check before the fork.
+ */
+const checkMintedAmountsBeforeFork = async (rewardContract, nbOfBlocksToCheck) => {
+    let lastMintedAmount = 0n;
+
+    for (let i = BLOCK_REWARD_STOP - nbOfBlocksToCheck; i < BLOCK_REWARD_STOP; i++) {
+
+        const totalMinted = BN(await rewardContract.mintedTotally({ blockTag: i }));
+
+        console.log(`\t* On block ${String(i)}: ${ethers.formatEther(String(totalMinted))} EWT`);
+
+        expect(totalMinted).to.be.gte(lastMintedAmount, `${currentChain} mintedTotally at block ${String(i)} is ${String(totalMinted)}; should be > ${String(lastMintedAmount)}`);
+        lastMintedAmount = totalMinted;
+    }
+
+}
+
+/**
+ * Checks the mintedTotally amounts after the fork block.
+ * @param {*} rewardContract - The reward contract instance.
+ * @param {*} nbOfBlocksToCheck - Number of blocks to check after the fork.
+ */
+const checkMintedAmountsAfterFork = async (rewardContract, nbOfBlocksToCheck) => {
+    let lastMintedAmount = await rewardContract.mintedTotally({ blockTag: BLOCK_REWARD_STOP - 1n });
+
+    for (let i = BLOCK_REWARD_STOP; i < BLOCK_REWARD_STOP + nbOfBlocksToCheck; i++) {
+
+        const totalMinted = await rewardContract.mintedTotally({ blockTag: i });
+        const forkMinted = BN(totalMinted);
+
+        console.log(`\t* On block ${String(i)}: ${ethers.formatEther(String(forkMinted))} EWT`);
+
+        expect(forkMinted).to.be.eq(lastMintedAmount, `Fork mintedTotally at block ${String(i)} should be == ${String(lastMintedAmount)}`);
+        lastMintedAmount = forkMinted;
+    }
+}
+
 /* ------------------------------------------------------------------------ */
 /* Test Suite                                                               */
 /* ------------------------------------------------------------------------ */
@@ -112,7 +157,7 @@ describe("VOLTA SHADOW-FORK VALIDATION TESTS :", function () {
             ).to.be.rejectedWith(/nonce|known|already|underpriced/i);
         });
 
-        it("\x1b[34m Deploys and interacts with a simple Counter contract on the upgraded chain \x1b[0m", async function () {
+        it("\x1b[34m Correctly deploys and interacts with a simple Counter contract on the upgraded chain \x1b[0m", async function () {
 
             try {
                 const DEPLOY_PK = process.env.DEPLOY_PK;
@@ -156,79 +201,24 @@ describe("VOLTA SHADOW-FORK VALIDATION TESTS :", function () {
 
 
     describe("\n- State consistency validation", function () {
-        const nbOfBlocksToCheck = 10n; // Number of blocks to check before and after the fork
 
         const abi = ["function mintedTotally() view returns (uint256)"];
+        const nbOfBlocksToCheck = 10n; // Number of blocks to check before and after the fork
 
         it(`\x1b[34m Before fork, minted Totally increases on ${currentChain}  \x1b[0m`, async () => {
-            let lastMintedAmount = 0n;
             console.log(`\n \x1b[33m [${currentChain}] MintedTotally: (Checking ${nbOfBlocksToCheck} blocks before fork):\n \x1b[0m`);
 
-            const contract = new ethers.Contract(REWARDS_CONTRACT, abi, provider);
-            for (let i = BLOCK_REWARD_STOP - nbOfBlocksToCheck; i < BLOCK_REWARD_STOP; i++) {
-
-                const totalMinted = BN(await contract.mintedTotally({ blockTag: i }));
-
-                console.log(`\t* On block ${String(i)}: ${ethers.formatEther(String(totalMinted))} EWT`);
-
-                expect(totalMinted).to.be.gte(lastMintedAmount, `${currentChain} mintedTotally at block ${String(i)} is ${String(totalMinted)}; should be > ${String(lastMintedAmount)}`);
-                lastMintedAmount = totalMinted;
-            }
+            const rewardContract = new ethers.Contract(REWARDS_CONTRACT, abi, provider);
+            await checkMintedAmountsBeforeFork(rewardContract, nbOfBlocksToCheck);
         });
 
-        it("\x1b[34m Before fork, minted Totally increases on forked chain\x1b[0m", async () => {
-            console.log(`\n \x1b[33m [Fork] MintedTotally: (Checking ${nbOfBlocksToCheck} blocks before fork):\n \x1b[0m`);
-
-            let lastMintedAmount = 0n;
-            const contract = new ethers.Contract(REWARDS_CONTRACT, abi, provider);
-
-            for (let i = BLOCK_REWARD_STOP - nbOfBlocksToCheck; i < BLOCK_REWARD_STOP; i++) {
-
-                const totalMinted = await contract.mintedTotally({ blockTag: i });
-
-                const forkMinted = BN(totalMinted);
-
-                console.log(`\t* On block ${String(i)}: ${ethers.formatEther(String(forkMinted))} EWT`);
-
-                expect(forkMinted).to.be.gte(lastMintedAmount, `Volta mintedTotally at block ${String(i)} is ${String(forkMinted)}; should be > ${String(lastMintedAmount)}`);
-
-                lastMintedAmount = forkMinted;
-            }
-        });
-
-        it("\x1b[34m After fork, mintedTotally still increases on Volta \x1b[0m", async () => {
-            let lastMintedAmount = 0n;
-            console.log(`\n\x1b[33m[Volta] MintedTotally: (Checking ${nbOfBlocksToCheck} blocks after fork):\n \x1b[0m`);
-
-            const contract = new ethers.Contract(REWARDS_CONTRACT, abi, provider);
-            for (let i = BLOCK_REWARD_STOP; i < BLOCK_REWARD_STOP + nbOfBlocksToCheck; i++) {
-
-                const totalMinted = await contract.mintedTotally({ blockTag: i });
-
-                const voltaMinted = BN(totalMinted);
-
-                console.log(`\t* On block ${String(i)}: ${ethers.formatEther(String(voltaMinted))} EWT`);
-
-                expect(voltaMinted).to.be.gte(lastMintedAmount, `Volta mintedTotally at block ${String(i)} should be > ${String(lastMintedAmount)}`);
-                lastMintedAmount = voltaMinted;
-            }
-        });
-
-        it("\x1b[34m After fork, mintedTotally \x1b[32mDOES NOT INCREASE\x1b \x1b[34m on Shadow Fork \x1b[0m", async () => {
+        it(`\x1b[34m After fork, mintedTotally \x1b[32mDOES NOT INCREASE\x1b \x1b[34m on on ${currentChain} \x1b[0m`, async () => {
 
             console.log(`\n\x1b[33m [Fork] MintedTotally: (Checking ${nbOfBlocksToCheck} blocks after fork):\n \x1b[0m`);
-            const contract = new ethers.Contract(REWARDS_CONTRACT, abi, provider);
-            let lastMintedAmount = await contract.mintedTotally({ blockTag: BLOCK_REWARD_STOP - 1n });
-            for (let i = BLOCK_REWARD_STOP; i < BLOCK_REWARD_STOP + nbOfBlocksToCheck; i++) {
 
-                const totalMinted = await contract.mintedTotally({ blockTag: i });
-                const forkMinted = BN(totalMinted);
+            const rewardContract = new ethers.Contract(REWARDS_CONTRACT, abi, provider);
 
-                console.log(`\t* On block ${String(i)}: ${ethers.formatEther(String(forkMinted))} EWT`);
-
-                expect(forkMinted).to.be.eq(lastMintedAmount, `Fork mintedTotally at block ${String(i)} should be == ${String(lastMintedAmount)}`);
-                lastMintedAmount = forkMinted;
-            }
+            await checkMintedAmountsAfterFork(rewardContract, nbOfBlocksToCheck)
         });
     });
 
