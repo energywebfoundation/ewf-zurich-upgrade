@@ -96,7 +96,6 @@ describe(`${currentChain.toUpperCase()} FORK VALIDATION TESTS :`, function () {
                 const [pre, post] = await Promise.all([
                     provider.call(
                         { to: VALIDATORS_CONTRACT, data: GET_VALIDATORS_SIG },
-                        // toHex(BLOCK_BEFORE_VALIDATOR_SWITCH)
                         toHex(BLOCK_BEFORE_REWARD_STOP)
                     ),
                     provider.call(
