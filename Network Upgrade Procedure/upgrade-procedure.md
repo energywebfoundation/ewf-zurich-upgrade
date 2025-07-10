@@ -1,3 +1,8 @@
+## Description
+
+Document captures high level procedure and steps taken by EW to securely and reliably conduct EWC Zurich Hard fork. If you are looking for node upgrade scripts/manuals, please refer to other documents stored on root level of this repository.
+
+
 ## High Level Hard Fork (HF) Procedure
 
 1. Determine suitable version of the clients for OpenEthereum (OE) / Nethermind
@@ -17,7 +22,7 @@
 
 ------------------------------------------
 
-## Upgrade Procedure
+## Atomic Upgrade Procedure
 
 ### Shadowfork
 
