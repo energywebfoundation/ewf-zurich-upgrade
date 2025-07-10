@@ -1,6 +1,6 @@
 ## Running Tests
 
-To run the `shadowForkValidation.js` tests using Hardhat:
+To run the `VoltaValidation.js` tests using Hardhat:
 
 1. Install dependencies:
    ```bash
@@ -16,7 +16,5 @@ To run the `shadowForkValidation.js` tests using Hardhat:
 
 3. Run the tests:
    ```bash
-   npx hardhat test --network shadowfork
+   npx hardhat test --network volta
    ```
-
-   Replace `shadowfork` with `shadowforkOE` or `shadowforkNM` if you want to target specific shadow fork networks.
