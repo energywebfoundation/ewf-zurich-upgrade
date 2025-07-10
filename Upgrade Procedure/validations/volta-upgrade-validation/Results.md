@@ -1,7 +1,7 @@
-# Shadow-Fork validation test results
+# Volta upgrade validation test results
 
 ## Overview
-Tests in "test/shadowForkValidation.js" validate the fork behavior by ensuring:
+Tests in "test/VoltaValidation.js" validate the fork behavior by ensuring:
 - Validator set remains consistent before and after the fork.
 - Rewards contract bytecode changes exactly at the fork block.
 - Replayed pre-fork transactions are correctly rejected.
