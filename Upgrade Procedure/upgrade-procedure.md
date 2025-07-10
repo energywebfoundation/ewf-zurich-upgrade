@@ -1,11 +1,19 @@
 ## High Level Hard Fork (HF) Procedure
 
-1. Determine suitable version of the clients for OE / Nethermind (3.3.5 for OE, 1.31.12 for Nethermind).
+1. Determine suitable version of the clients for OpenEthereum (OE) / Nethermind
 2. Determine upgrade procedure.
 3. Conduct extensive local tests – shadowfork tests conducted over Volta shadowfork ([reference](https://nethermind.notion.site/AuRA-Rewards-Contract-Shadowfork-1e5360fc38d0806ba6b6fb8c7531421c)).
 4. Determine disaster recovery procedure.
-5. Conduct Volta HF (EWC Testnet, following upgrade procedure).
+5. Conduct Volta (EWC Testnet) hard fork (HF) following upgrade procedure.
 6. Conduct EWC HF following upgrade procedure.
+
+------------------------------------------
+
+## Glossary
+1. EWC - Energy Web Chain
+2. HF - hard fork
+3. Volta - EWC Testnet
+4. OE - OpenEthereum
 
 ------------------------------------------
 
@@ -15,10 +23,10 @@
 
 1. Creation of new version of system contract.
 2. Setting up Volta Shadowfork with both new versions of Nethermind and OE.
-3. Execution of HF with new system contract assuming happy path (all validators comply).
+3. Execution of Volta Shadowfork HF with new system contract assuming happy path (all validators comply).
 4. Definition of tests for post-HF validation.
 5. Executing tests against Volta Shadowfork.
-6. Execution of HF with new system contract assuming unhappy path (not all validators comply).
+6. Execution of Volta Shadowfork HF with new system contract assuming unhappy path (not all validators comply).
 7. Formulation of disaster recovery plan.
 
 ### Volta
@@ -31,10 +39,10 @@
 6. Determining transition block number (for Volta, at least 1 week in the future).
 7. Releasing communication of Volta upgrade to validators.
 8. Creating backups of archive/fast node DBs for both Nethermind and OE in case of disaster recovery needs.
-9. Temporary removal of non-operational/non-traceable nodes right before the fork block.
+9. Temporary removal of non-operational (validators not actively validating) and non-traceable (validators for which it is impossible to determine whether they have performed the upgrade) validator nodes from active validator set right before the fork block.
 10. Secure monitoring of the chain around the fork block time.
 11. Execution of predefined tests against Volta.
-12. Re-initiation of fixed validator nodes.
+12. Re-addition of fixed validator nodes back to validator set once ensured they are syncing properly with the network (might require node resync)
 
 ### EWC
 
@@ -46,10 +54,10 @@
 6. Determining transition block number (for EWC, at least 1 week in the future).
 7. Releasing communication of EWC upgrade to validators.
 8. Creating backups of archive/fast node DBs for both Nethermind and OE in case of disaster recovery needs.
-9. Temporary removal of non-operational/non-traceable nodes right before the fork block.
+9. Temporary removal of non-operational (validators not actively validating) and non-traceable (validators for which it is impossible to determine whether they have performed the upgrade) validator nodes from active validator set right before the fork block.
 10. Secure monitoring of the chain around the fork block time.
 11. Execution of predefined tests against EWC.
-12. Re-initiation of fixed validator nodes.
+12. Re-addition of fixed validator nodes back to validator set once ensured they are syncing properly with the network (might require node resync)
 
 ------------------------------------------
 
