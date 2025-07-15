@@ -35,10 +35,10 @@ ENERGYWEB_CHAINSPEC_URL="https://raw.githubusercontent.com/energywebfoundation/e
 
 # Chainspec SHA256 checksums
 VOLTA_CHAINSPEC_SHA256="5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37"
-ENERGYWEB_CHAINSPEC_SHA256="7a05ac8da3d3f7192da074dd6987205fdb3300f7dd4970876e5f2ad249bbcd2d"
+ENERGYWEB_CHAINSPEC_SHA256="98631f030589a4e5819ea2b9655012781e371ee320bf9c60a9768e90ab8ebe5c"
 
 # New Client Version
-NETHERMIND_NEW_VERSION="1.31.12"
+NETHERMIND_NEW_VERSION="1.31.13"
 OPENETHEREUM_NEW_VERSION="v3.3.5"
 
 # Set log file name based on run mode
@@ -467,7 +467,7 @@ update_image_version() {
         case "$line" in
             NETHERMIND_VERSION=*)
                 if [[ "$CLIENT_TYPE" == "nethermind" ]]; then
-                    echo "NETHERMIND_VERSION=\"nethermind/nethermind:${NETHERMIND_NEW_VERSION}\"" >> "$temp_file"
+                    echo "NETHERMIND_VERSION=nethermind/nethermind:${NETHERMIND_NEW_VERSION}" >> "$temp_file"
                     log_info "🔄 Updated Nethermind version: $current_ver -> ${NETHERMIND_NEW_VERSION}"
                 else
                     echo "$line" >> "$temp_file"
@@ -475,7 +475,7 @@ update_image_version() {
                 ;;
             PARITY_VERSION=*)
                 if [[ "$CLIENT_TYPE" == "openethereum" ]]; then
-                    echo "PARITY_VERSION=\"openethereum/openethereum:${OPENETHEREUM_NEW_VERSION}\"" >> "$temp_file"
+                    echo "PARITY_VERSION=openethereum/openethereum:${OPENETHEREUM_NEW_VERSION}" >> "$temp_file"
                     log_info "🔄 Updated OpenEthereum version: $current_ver -> ${OPENETHEREUM_NEW_VERSION}"
                 else
                     echo "$line" >> "$temp_file"
@@ -489,6 +489,72 @@ update_image_version() {
 
     mv "$temp_file" "$ENV_FILE"
     log_info "✅ Image version updated successfully"
+}
+
+# Check and fix docker-compose image references
+check_fix_docker_compose() {
+    log_info "🔍 Checking docker-compose.yml for hardcoded image versions..."
+
+    # Skip if docker-compose file not found
+    if [[ ! -f "$DOCKER_COMPOSE_FILE" ]]; then
+        log_error "❌ Docker compose file not found: $DOCKER_COMPOSE_FILE"
+        return 1
+    fi
+
+    backup_file "$DOCKER_COMPOSE_FILE"
+
+    local needs_update=false
+    # shellcheck disable=SC2034
+    # shellcheck disable=SC2155
+    local yml_content=$(<"$DOCKER_COMPOSE_FILE")
+    # shellcheck disable=SC2155
+    local temp_file=$(mktemp)
+
+    # For Nethermind
+    if [[ "$CLIENT_TYPE" == "nethermind" ]]; then
+        # Check if nethermind image is hardcoded (not using ${NETHERMIND_VERSION})
+        if grep -q "image:.*nethermind/nethermind:.*" "$DOCKER_COMPOSE_FILE" | grep -v "image: *\${NETHERMIND_VERSION}"; then
+            needs_update=true
+            log_info "🔍 Found hardcoded Nethermind image in docker-compose.yml"
+
+            # Replace hardcoded image with variable reference
+            awk '{
+                if ($0 ~ /image:.*nethermind\/nethermind:/) {
+                    gsub(/image:.*nethermind\/nethermind:[^ ]*/, "image: ${NETHERMIND_VERSION}")
+                }
+                print $0
+            }' "$DOCKER_COMPOSE_FILE" > "$temp_file"
+
+            mv "$temp_file" "$DOCKER_COMPOSE_FILE"
+            log_info "✅ Updated docker-compose.yml to use \${NETHERMIND_VERSION} variable"
+        else
+            log_info "✅ docker-compose.yml already using \${NETHERMIND_VERSION} variable"
+        fi
+    # For OpenEthereum
+    elif [[ "$CLIENT_TYPE" == "openethereum" ]]; then
+        # Check if openethereum image is hardcoded (not using ${PARITY_VERSION})
+        if grep -q "image:.*openethereum/openethereum:.*" "$DOCKER_COMPOSE_FILE" | grep -v "image: *\${PARITY_VERSION}"; then
+            needs_update=true
+            log_info "🔍 Found hardcoded OpenEthereum image in docker-compose.yml"
+
+            # Replace hardcoded image with variable reference
+            awk '{
+                if ($0 ~ /image:.*openethereum\/openethereum:/) {
+                    gsub(/image:.*openethereum\/openethereum:[^ ]*/, "image: ${PARITY_VERSION}")
+                }
+                print $0
+            }' "$DOCKER_COMPOSE_FILE" > "$temp_file"
+
+            mv "$temp_file" "$DOCKER_COMPOSE_FILE"
+            log_info "✅ Updated docker-compose.yml to use \${PARITY_VERSION} variable"
+        else
+            log_info "✅ docker-compose.yml already using \${PARITY_VERSION} variable"
+        fi
+    fi
+
+    if [[ "$needs_update" == "true" ]]; then
+        log_info "🔄 Updated docker-compose.yml file to use environment variables for image versions"
+    fi
 }
 
 # Download chainspec
@@ -849,13 +915,43 @@ main() {
                 log_info "           - $container"
             done
 
-            if command -v systemctl &>/dev/null && (systemctl list-unit-files | grep -i telegraf || [ -f "/lib/systemd/system/telegraf.service" ] || [ -f "/etc/systemd/system/telegraf.service" ]); then
-                log_info "🔍 DRY RUN: Would restart telegraf service via systemctl"
-            elif command -v service &>/dev/null && service --status-all 2>&1 | grep -i telegraf; then
-                log_info "🔍 DRY RUN: Would restart telegraf service via service command"
-            else
+            # Add check for docker-compose.yml references
+            if [[ "$CLIENT_TYPE" == "nethermind" ]]; then
+                if grep -q "image:.*nethermind/nethermind:.*" "$DOCKER_COMPOSE_FILE" | grep -v "image: *\${NETHERMIND_VERSION}"; then
+                    log_info "🔍 DRY RUN: Would update docker-compose.yml to use \${NETHERMIND_VERSION} instead of hardcoded image"
+                else
+                    log_info "✅ DRY RUN: docker-compose.yml already using \${NETHERMIND_VERSION} variable"
+                fi
+            elif [[ "$CLIENT_TYPE" == "openethereum" ]]; then
+                if grep -q "image:.*openethereum/openethereum:.*" "$DOCKER_COMPOSE_FILE" | grep -v "image: *\${PARITY_VERSION}"; then
+                    log_info "🔍 DRY RUN: Would update docker-compose.yml to use \${PARITY_VERSION} instead of hardcoded image"
+                else
+                    log_info "✅ DRY RUN: docker-compose.yml already using \${PARITY_VERSION} variable"
+                fi
+            fi
+
+            # Fix telegraf service detection logging
+            local has_telegraf=false
+            if command -v systemctl &>/dev/null; then
+                if systemctl list-unit-files 2>/dev/null | grep -q "telegraf.service" || [ -f "/lib/systemd/system/telegraf.service" ] || [ -f "/etc/systemd/system/telegraf.service" ]; then
+                    has_telegraf=true
+                    log_info "🔍 DRY RUN: Would restart telegraf service via systemctl"
+                fi
+            fi
+
+            # Replace the problematic service detection with a more reliable check
+            if [[ "$has_telegraf" == "false" ]] && command -v service &>/dev/null; then
+                # Try direct service status check instead of service --status-all
+                if service telegraf status &>/dev/null || pgrep -f telegraf &>/dev/null; then
+                    log_info "🔍 DRY RUN: Would restart telegraf service via service command"
+                    has_telegraf=true
+                fi
+            fi
+
+            if [[ "$has_telegraf" == "false" ]]; then
                 log_info "🔍 DRY RUN: No telegraf service detected, would skip telegraf restart"
             fi
+
     else
         # Confirmation
         echo
@@ -866,6 +962,10 @@ main() {
         fi
 
         update_image_version
+
+        # Add check_fix_docker_compose call here, before downloading chainspec
+        check_fix_docker_compose
+
         download_chainspec "$network"
 
         if [[ "$skip_restart" != "true" ]]; then

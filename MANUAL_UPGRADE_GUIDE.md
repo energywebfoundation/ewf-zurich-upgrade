@@ -10,10 +10,10 @@
 
 ## 1. Pre-upgrade Checks 📋
 
-SSH into validator node and ensure you have the necessary permissions to perform the upgrade.
+SSH into node and ensure you have the necessary permissions to perform the upgrade.
 
 ```bash
-ssh validator-node-ip
+ssh node-ip
 ```
 
 ### 1.1 Check client version
@@ -55,7 +55,7 @@ IMAGE                                      NAMES
 nethermind/nethermind:1.31.10              docker-stack_nethermind_1
 ```
 
-### 1.1.2 Check the `.env` file ✏️
+### 1.1.3 Check the `.env` file ✏️
 
 ```bash
 cat docker-stack/.env
@@ -153,7 +153,7 @@ echo "7a05ac8da3d3f7192da074dd6987205fdb3300f7dd4970876e5f2ad249bbcd2d chainspec
 chainspec/energyweb.json: OK
 ```
 
-## 5. Restart Node 🚀
+## 4. Restart Node 🚀
 
 ```bash
 sudo -s
@@ -161,15 +161,15 @@ cd docker-stack
 docker-compose up -d --force-recreate
 ```
 
-## 6. Verify Upgrade ✅
+## 5. Verify Upgrade ✅
 
-### 6.1 Check Container Status
+### 5.1 Check Container Status
 
 ```bash
 docker-compose ps
 ```
 
-### 6.2 Check Client Version on running node
+### 5.2 Check Client Version on running node
 
 ```bash
 curl -X POST -H "Content-Type: application/json" \
@@ -186,7 +186,7 @@ curl -X POST -H "Content-Type: application/json" \
 
 ```
 
-### 6.3 Check Logs 🔍
+### 5.3 Check Logs 🔍
 
 ```bash
 # For Nethermind
@@ -198,7 +198,7 @@ docker-compose logs -f --tail 100 parity
 docker-compose logs -f --tail 100 parity-telemetry
 ```
 
-### 6.4 Restart Telegraf Service 🔄
+### 5.4 Restart Telegraf Service 🔄
 
 User might need to restart the Telegraf service to ensure telemetry immediately picks up the new client version
 
@@ -206,7 +206,7 @@ User might need to restart the Telegraf service to ensure telemetry immediately 
 sudo systemctl restart telegraf
 ```
 
-### 6.5 Network Sync Status ♾️
+### 5.5 Network Sync Status ♾️
 
 ```bash
 # Check sync status

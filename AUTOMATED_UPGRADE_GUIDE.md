@@ -11,7 +11,7 @@
 - 🛠️ Supports both Nethermind and OpenEthereum clients
 - 📥 Downloads correct chainspec
 - 🔄 Updates client versions ♦
-  - Nethermind: → `1.31.12`
+  - Nethermind: → `1.31.13`
   - OpenEthereum: → `v3.3.5`
 - 💾 Creates backups before any changes [Optional]
 - 🚀 Handles container restart and telegraf service restart
