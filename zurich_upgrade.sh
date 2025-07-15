@@ -504,16 +504,14 @@ check_fix_docker_compose() {
     backup_file "$DOCKER_COMPOSE_FILE"
 
     local needs_update=false
-    # shellcheck disable=SC2034
-    # shellcheck disable=SC2155
-    local yml_content=$(<"$DOCKER_COMPOSE_FILE")
     # shellcheck disable=SC2155
     local temp_file=$(mktemp)
 
     # For Nethermind
     if [[ "$CLIENT_TYPE" == "nethermind" ]]; then
         # Check if nethermind image is hardcoded (not using ${NETHERMIND_VERSION})
-        if grep -q "image:.*nethermind/nethermind:.*" "$DOCKER_COMPOSE_FILE" | grep -v "image: *\${NETHERMIND_VERSION}"; then
+        # Fix: Use better grep pattern with proper command structure
+        if grep -q "image:.*nethermind/nethermind:.*" "$DOCKER_COMPOSE_FILE" && ! grep -q "image:.*\${NETHERMIND_VERSION}" "$DOCKER_COMPOSE_FILE"; then
             needs_update=true
             log_info "🔍 Found hardcoded Nethermind image in docker-compose.yml"
 
@@ -533,7 +531,8 @@ check_fix_docker_compose() {
     # For OpenEthereum
     elif [[ "$CLIENT_TYPE" == "openethereum" ]]; then
         # Check if openethereum image is hardcoded (not using ${PARITY_VERSION})
-        if grep -q "image:.*openethereum/openethereum:.*" "$DOCKER_COMPOSE_FILE" | grep -v "image: *\${PARITY_VERSION}"; then
+        # Fix: Use better grep pattern with proper command structure
+        if grep -q "image:.*openethereum/openethereum:.*" "$DOCKER_COMPOSE_FILE" && ! grep -q "image:.*\${PARITY_VERSION}" "$DOCKER_COMPOSE_FILE"; then
             needs_update=true
             log_info "🔍 Found hardcoded OpenEthereum image in docker-compose.yml"
 
@@ -915,15 +914,15 @@ main() {
                 log_info "           - $container"
             done
 
-            # Add check for docker-compose.yml references
+            # Add check for docker-compose.yml references - fix the same grep issue here
             if [[ "$CLIENT_TYPE" == "nethermind" ]]; then
-                if grep -q "image:.*nethermind/nethermind:.*" "$DOCKER_COMPOSE_FILE" | grep -v "image: *\${NETHERMIND_VERSION}"; then
+                if grep -q "image:.*nethermind/nethermind:.*" "$DOCKER_COMPOSE_FILE" && ! grep -q "image:.*\${NETHERMIND_VERSION}" "$DOCKER_COMPOSE_FILE"; then
                     log_info "🔍 DRY RUN: Would update docker-compose.yml to use \${NETHERMIND_VERSION} instead of hardcoded image"
                 else
                     log_info "✅ DRY RUN: docker-compose.yml already using \${NETHERMIND_VERSION} variable"
                 fi
             elif [[ "$CLIENT_TYPE" == "openethereum" ]]; then
-                if grep -q "image:.*openethereum/openethereum:.*" "$DOCKER_COMPOSE_FILE" | grep -v "image: *\${PARITY_VERSION}"; then
+                if grep -q "image:.*openethereum/openethereum:.*" "$DOCKER_COMPOSE_FILE" && ! grep -q "image:.*\${PARITY_VERSION}" "$DOCKER_COMPOSE_FILE"; then
                     log_info "🔍 DRY RUN: Would update docker-compose.yml to use \${PARITY_VERSION} instead of hardcoded image"
                 else
                     log_info "✅ DRY RUN: docker-compose.yml already using \${PARITY_VERSION} variable"
