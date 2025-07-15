@@ -93,7 +93,7 @@ For Nethermind:
 
 ```bash
 # Update NETHERMIND_VERSION in .env
-NETHERMIND_VERSION="nethermind/nethermind:1.31.12"
+NETHERMIND_VERSION="nethermind/nethermind:1.31.13"
 ```
 
 For OpenEthereum:
@@ -113,7 +113,8 @@ cd docker-stack
 curl -o config/chainspec.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/Volta.json
 
 # Verify SHA256 checksum ✔️
-echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 config/chainspec.json" | sha256sum -c
+echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 config/chainspec.json" | sha256sum -c -
+# Output should be
 config/chainspec.json: OK
 ```
 
@@ -125,7 +126,8 @@ cd docker-stack
 curl -o chainspec/volta.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/Volta.json
 
 # Verify SHA256 checksum ✔️
-echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 chainspec/volta.json" | sha256sum -c
+echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 chainspec/volta.json" | sha256sum -c -
+# Output should be
 chainspec/volta.json: OK
 ```
 
@@ -137,7 +139,8 @@ cd docker-stack
 curl -o config/chainspec.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
-echo "7a05ac8da3d3f7192da074dd6987205fdb3300f7dd4970876e5f2ad249bbcd2d config/chainspec.json" | sha256sum -c
+echo "98631f030589a4e5819ea2b9655012781e371ee320bf9c60a9768e90ab8ebe5c config/chainspec.json" | sha256sum -c -
+# Output should be
 config/chainspec.json: OK
 ```
 
@@ -149,7 +152,8 @@ cd docker-stack
 curl -o chainspec/energyweb.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
-echo "7a05ac8da3d3f7192da074dd6987205fdb3300f7dd4970876e5f2ad249bbcd2d chainspec/energyweb.json" | sha256sum -c
+echo "98631f030589a4e5819ea2b9655012781e371ee320bf9c60a9768e90ab8ebe5c chainspec/energyweb.json" | sha256sum -c -
+# Output should be
 chainspec/energyweb.json: OK
 ```
 
