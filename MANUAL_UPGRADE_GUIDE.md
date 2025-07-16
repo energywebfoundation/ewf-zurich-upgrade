@@ -139,7 +139,7 @@ cd docker-stack
 curl -o config/chainspec.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
-echo "98631f030589a4e5819ea2b9655012781e371ee320bf9c60a9768e90ab8ebe5c config/chainspec.json" | sha256sum -c -
+echo "5dedb25779a1f2d230fe8658651547e602076967b71f14d14fb984dbf38a9b3b config/chainspec.json" | sha256sum -c -
 # Output should be
 config/chainspec.json: OK
 ```
@@ -152,7 +152,7 @@ cd docker-stack
 curl -o chainspec/energyweb.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
-echo "98631f030589a4e5819ea2b9655012781e371ee320bf9c60a9768e90ab8ebe5c chainspec/energyweb.json" | sha256sum -c -
+echo "5dedb25779a1f2d230fe8658651547e602076967b71f14d14fb984dbf38a9b3b chainspec/energyweb.json" | sha256sum -c -
 # Output should be
 chainspec/energyweb.json: OK
 ```
@@ -182,11 +182,11 @@ curl -X POST -H "Content-Type: application/json" \
 ```
 
 ```bash
-# Resoinse of running node of OpenEthereum
+# Response of running node of OpenEthereum
 {"jsonrpc":"2.0","result":"OpenEthereum//v3.3.5-stable/x86_64-linux-musl/rustc1.59.0","id":1}
 
-# Resoinse of running node of Nethermind
-{"jsonrpc":"2.0","result":"Nethermind/v1.31.12+3b5f1ca5/linux-x64/dotnet9.0.6","id":1}
+# Response of running node of Nethermind
+{"jsonrpc":"2.0","result":"Nethermind/v1.31.13+1b548727/linux-x64/dotnet9.0.7","id":1}
 
 ```
 
@@ -204,7 +204,7 @@ docker-compose logs -f --tail 100 parity-telemetry
 
 ### 5.4 Restart Telegraf Service 🔄
 
-User might need to restart the Telegraf service to ensure telemetry immediately picks up the new client version
+User might need to restart the Telegraf service to ensure telemetry picks up the new client version
 
 ```bash
 sudo systemctl restart telegraf
