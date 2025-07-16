@@ -10,10 +10,10 @@
 
 ## 1. Pre-upgrade Checks 📋
 
-SSH into validator node and ensure you have the necessary permissions to perform the upgrade.
+SSH into node and ensure you have the necessary permissions to perform the upgrade.
 
 ```bash
-ssh validator-node-ip
+ssh node-ip
 ```
 
 ### 1.1 Check client version
@@ -55,7 +55,7 @@ IMAGE                                      NAMES
 nethermind/nethermind:1.31.10              docker-stack_nethermind_1
 ```
 
-### 1.1.2 Check the `.env` file ✏️
+### 1.1.3 Check the `.env` file ✏️
 
 ```bash
 cat docker-stack/.env
@@ -93,7 +93,7 @@ For Nethermind:
 
 ```bash
 # Update NETHERMIND_VERSION in .env
-NETHERMIND_VERSION="nethermind/nethermind:1.31.12"
+NETHERMIND_VERSION="nethermind/nethermind:1.31.13"
 ```
 
 For OpenEthereum:
@@ -113,7 +113,8 @@ cd docker-stack
 curl -o config/chainspec.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/Volta.json
 
 # Verify SHA256 checksum ✔️
-echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 config/chainspec.json" | sha256sum -c
+echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 config/chainspec.json" | sha256sum -c -
+# Output should be
 config/chainspec.json: OK
 ```
 
@@ -125,7 +126,8 @@ cd docker-stack
 curl -o chainspec/volta.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/Volta.json
 
 # Verify SHA256 checksum ✔️
-echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 chainspec/volta.json" | sha256sum -c
+echo "5f897743eaa1a6d901c377d1b7a8a385ec836c7588cf11a1b6c72172c5fdfc37 chainspec/volta.json" | sha256sum -c -
+# Output should be
 chainspec/volta.json: OK
 ```
 
@@ -137,7 +139,8 @@ cd docker-stack
 curl -o config/chainspec.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
-echo "7a05ac8da3d3f7192da074dd6987205fdb3300f7dd4970876e5f2ad249bbcd2d config/chainspec.json" | sha256sum -c
+echo "2bbdf8758f07cf3f33124dbde8fa66d31c169bcafc71e453e85035ca79ccfb7e config/chainspec.json" | sha256sum -c -
+# Output should be
 config/chainspec.json: OK
 ```
 
@@ -149,11 +152,12 @@ cd docker-stack
 curl -o chainspec/energyweb.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
-echo "7a05ac8da3d3f7192da074dd6987205fdb3300f7dd4970876e5f2ad249bbcd2d chainspec/energyweb.json" | sha256sum -c
+echo "2bbdf8758f07cf3f33124dbde8fa66d31c169bcafc71e453e85035ca79ccfb7e chainspec/energyweb.json" | sha256sum -c -
+# Output should be
 chainspec/energyweb.json: OK
 ```
 
-## 5. Restart Node 🚀
+## 4. Restart Node 🚀
 
 ```bash
 sudo -s
@@ -161,15 +165,15 @@ cd docker-stack
 docker-compose up -d --force-recreate
 ```
 
-## 6. Verify Upgrade ✅
+## 5. Verify Upgrade ✅
 
-### 6.1 Check Container Status
+### 5.1 Check Container Status
 
 ```bash
 docker-compose ps
 ```
 
-### 6.2 Check Client Version on running node
+### 5.2 Check Client Version on running node
 
 ```bash
 curl -X POST -H "Content-Type: application/json" \
@@ -178,15 +182,15 @@ curl -X POST -H "Content-Type: application/json" \
 ```
 
 ```bash
-# Resoinse of running node of OpenEthereum
+# Response of running node of OpenEthereum
 {"jsonrpc":"2.0","result":"OpenEthereum//v3.3.5-stable/x86_64-linux-musl/rustc1.59.0","id":1}
 
-# Resoinse of running node of Nethermind
-{"jsonrpc":"2.0","result":"Nethermind/v1.31.12+3b5f1ca5/linux-x64/dotnet9.0.6","id":1}
+# Response of running node of Nethermind
+{"jsonrpc":"2.0","result":"Nethermind/v1.31.13+1b548727/linux-x64/dotnet9.0.7","id":1}
 
 ```
 
-### 6.3 Check Logs 🔍
+### 5.3 Check Logs 🔍
 
 ```bash
 # For Nethermind
@@ -198,7 +202,15 @@ docker-compose logs -f --tail 100 parity
 docker-compose logs -f --tail 100 parity-telemetry
 ```
 
-### 6.4 Network Sync Status ♾️
+### 5.4 Restart Telegraf Service 🔄
+
+User might need to restart the Telegraf service to ensure telemetry picks up the new client version
+
+```bash
+sudo systemctl restart telegraf
+```
+
+### 5.5 Network Sync Status ♾️
 
 ```bash
 # Check sync status
