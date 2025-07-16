@@ -139,7 +139,7 @@ cd docker-stack
 curl -o config/chainspec.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
-echo "5dedb25779a1f2d230fe8658651547e602076967b71f14d14fb984dbf38a9b3b config/chainspec.json" | sha256sum -c -
+echo "2bbdf8758f07cf3f33124dbde8fa66d31c169bcafc71e453e85035ca79ccfb7e config/chainspec.json" | sha256sum -c -
 # Output should be
 config/chainspec.json: OK
 ```
@@ -152,7 +152,7 @@ cd docker-stack
 curl -o chainspec/energyweb.json https://raw.githubusercontent.com/energywebfoundation/ewf-chainspec/master/EnergyWebChain.json
 
 # Verify SHA256 checksum ✔️
-echo "5dedb25779a1f2d230fe8658651547e602076967b71f14d14fb984dbf38a9b3b chainspec/energyweb.json" | sha256sum -c -
+echo "2bbdf8758f07cf3f33124dbde8fa66d31c169bcafc71e453e85035ca79ccfb7e chainspec/energyweb.json" | sha256sum -c -
 # Output should be
 chainspec/energyweb.json: OK
 ```
