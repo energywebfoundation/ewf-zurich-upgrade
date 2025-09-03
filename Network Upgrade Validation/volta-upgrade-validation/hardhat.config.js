@@ -1,12 +1,11 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
-const { VOLTA_RPC, EWC_RPC } = process.env;
+const { VOLTA_RPC } = process.env;
 
 module.exports = {
   solidity: "0.8.23",
   networks: {
     volta: { url: VOLTA_RPC},
-    ewc: { url: EWC_RPC},
   },
 };
