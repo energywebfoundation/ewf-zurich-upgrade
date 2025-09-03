@@ -89,3 +89,16 @@ These tests query key properties of the bridge contract—namely, the owner, lif
 
 ✔ The bridge contract liftingEnabled is the same before and after the fork
 ```
+
+- Similarly, the "loweringEnabled" test ensures that the lowering functionality status is unchanged by the fork.
+This comprehensive validation confirms that the expected static properties of the bridge contract remain unaffected by the upgrade.
+
+```bash
+
+[Bridge loweringEnabled]
+	Volta
+        - Pre-fork: true,
+        - Post-fork: true
+
+ ✔ The bridge contract loweringEnabled is the same before and after the fork
+```
