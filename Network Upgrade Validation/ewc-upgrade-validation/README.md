@@ -1,6 +1,6 @@
 ## Running Tests
 
-To run the `VoltaValidation.js` tests using Hardhat:
+To run the `ewcValidation.js` tests using Hardhat:
 
 1. Install dependencies:
    ```bash
@@ -16,5 +16,5 @@ To run the `VoltaValidation.js` tests using Hardhat:
 
 3. Run the tests:
    ```bash
-   npx hardhat test --network volta
+   npx hardhat test --network ewc
    ```
