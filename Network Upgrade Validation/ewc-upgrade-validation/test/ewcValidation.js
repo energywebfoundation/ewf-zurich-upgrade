@@ -11,8 +11,6 @@ dotenv.config();
 const BN = (n) => BigInt(n);
 
 // EWC hardfork block number
-// const BLOCK_REWARD_STOP = BN(36683760);
-// const BLOCK_REWARD_STOP = BN(36761500);
 const BLOCK_REWARD_STOP = BN(36871000);
 const BLOCK_BEFORE_REWARD_STOP = BLOCK_REWARD_STOP - 1n;
 
@@ -235,7 +233,6 @@ describe(`${currentChain.toUpperCase()} FORK VALIDATION TESTS (Block ${BLOCK_REW
     });
 
     describe("\n- Bridge contract state validation", function () {
-        // For EWC, we'll use the same fork block for bridge validation
         const BLOCK_FORK = BLOCK_REWARD_STOP;
         const BLOCK_PRE_FORK = BLOCK_BEFORE_REWARD_STOP;
         const BLOCK_POST_FORK = BLOCK_FORK;
